@@ -189,3 +189,148 @@ public:
     }
 };
 
+
+
+//CHECKING FOR BALANCED BINARY TREE
+
+//Naive approach
+
+//Time complexity --> O(N^2)
+
+class Solution {
+public:
+    int depth(TreeNode* root) {
+        if(root == NULL)
+            return false;
+        
+        int l = depth(root -> left);
+        int r = depth(root -> right);
+        
+        return 1 + max(l , r);
+    }
+    bool isBalanced(TreeNode* root) {
+        if(root == NULL)
+            return true;
+        
+        int l = depth(root -> left);
+        int r = depth(root -> right);
+        
+        if(abs(l - r) > 1)
+            return false;
+        
+        bool left = isBalanced(root -> left);
+        bool right = isBalanced(root -> right);
+        
+        if(!left or !right)
+            return false;
+        
+        return true;
+    }
+};
+
+//OPTIMISED APPROACH
+
+/*
+We can modify the deoth function to check weatgher the height difference between the left subtree and right subtree.
+if the difference is greater then 1 return -1 else the function simply going to return the height of subtree.
+
+*/
+
+class Solution {
+public:
+    int depth(TreeNode* root) {
+        if(root == NULL)
+            return false;
+        
+        int l = depth(root -> left);
+        int r = depth(root -> right);
+        
+        if(l == -1 or  r == -1)
+            return -1;
+        
+        if(abs(l - r) > 1)
+            return -1;
+        return 1 + max(l , r);
+    }
+    bool isBalanced(TreeNode* root) {
+        return (depth(root) == -1)? false : true;
+    }
+};
+
+
+//Diameter of a binary tree
+
+// Iterating over each node to find the max height of left and right subtree respectively
+
+// Time complexity --> O(n*n)
+
+class Solution {
+public:
+    int depth(TreeNode* root) {
+        if(root == NULL)
+            return 0;
+        
+        int l = depth(root -> left);
+        int r = depth(root -> right);
+        
+        return 1 + max(l , r);
+    }
+    
+    int diameter(TreeNode* root) {
+        if(root == NULL)
+            return 0;
+        
+        int l = depth(root -> left);
+        int r = depth(root -> right);
+        
+        int currDiameter = l + r;
+        return currDiameter;
+    }
+    
+    void preorder(TreeNode* root , int& maxDiameter) {
+        if(root == NULL) return;
+        
+        //processing
+        maxDiameter = max(maxDiameter , diameter(root));
+        
+        preorder(root -> left , maxDiameter);
+        preorder(root -> right, maxDiameter);
+    }
+    
+    int diameterOfBinaryTree(TreeNode* root) {
+        int maxDiameter = 0;
+        preorder(root , maxDiameter);
+        
+        return maxDiameter;
+    }
+};
+
+//Optimised approach
+
+//calculating the calue of max height of left and right subtree already in the depth function
+//just pass a maxi variable that will compute the max value of height of left and right subtree respectively.
+
+class Solution {
+public:
+    int depth(TreeNode* root , int& maxi) {
+        if(root == NULL)
+            return 0;
+        
+        int l = depth(root -> left , maxi);
+        int r = depth(root -> right , maxi);
+        
+        maxi = max(maxi , l + r);
+        
+        return 1 + max(l , r);
+    }
+    int diameterOfBinaryTree(TreeNode* root) {
+        int maxDiameter = 0;
+        int Maxheightoftree = depth(root , maxDiameter);
+        
+        return maxDiameter;
+    }
+};
+
+
+
+
