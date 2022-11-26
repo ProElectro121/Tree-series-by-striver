@@ -120,6 +120,72 @@ public:
 };
 
 
+// ITERATIVE PREORDER TRAVERSAL 
+
+class Solution {
+public:
+    vector<int> preorderTraversal(TreeNode* root) {
+        vector<int> preorder;
+        stack<TreeNode*> st;
+        if(root != NULL)
+        st.push(root);
+        
+        while(!st.empty()) {
+            TreeNode* node = st.top();
+            st.pop();
+            preorder.push_back(node -> val);
+            
+            if(node -> right != NULL) {
+                st.push(node -> right);
+            }
+            
+            if(node -> left != NULL) {
+                st.push(node -> left);
+            }
+               
+        }
+        return preorder;
+    }
+};
 
 
+
+// MAXIMUM DEPTH OF BINARY TREE
+
+//RECURRSIVE
+
+int maxDepth(TreeNode* root) {
+        if(root == NULL)
+            return 0;
+        
+        int l = maxDepth(root -> left);
+        int r = maxDepth(root -> right);
+        
+        return 1 + max(l , r);
+    }
+
+//ITERATIVE
+
+class Solution {
+public:
+    int maxDepth(TreeNode* root) {
+        int width = 0;
+        queue<TreeNode*> Q;
+        if(root != NULL)
+        Q.push(root);
+        while(!Q.empty()) {
+            int sz = Q.size();
+            for(int i = 0; i < sz; i++) { 
+              TreeNode* node = Q.front();
+              Q.pop();
+              if(node -> left != NULL)
+                Q.push(node -> left);
+              if(node -> right != NULL)  
+              Q.push(node -> right);
+            }
+            width++;
+        }
+        return width;
+    }
+};
 
