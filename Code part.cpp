@@ -486,5 +486,132 @@ public:
 };
 
 
+// VERTICAL ORDER TRAVERSAL OF A BINARY TREE
 
+/*
+   assigning each node of the tree a level and rows 
+   level vary from form -n , -(n - 1) , ... 0 , 1 , 2 , .. (n).
+   row vary form 0 , 1 , 2 .. .. n
+   
+   then iterating the row and level in ascending order
+   for similar elements we can stoe them in a multiset
+   
+   creating a queue - > queue< pair< node , pai<int,int>>>
+   map -- > map<int,map<int,multiset<int>>> m;
+   
+   for left child - > store (level -1 , row + 1)
+   for right child - > store (level + 1 , row + 1)
+   
+   for inserting a multiset element in a vector
+   
+   temp -> vector
+   
+   ms -> multiset
+   
+   temp.insert(temp.end() , ms.begin() , ms.end());
+*/
+
+
+class Solution {
+public:
+    vector<vector<int>> verticalTraversal(TreeNode* root) {
+        vector<vector<int>> vertical;
+        queue<pair<TreeNode* , pair<int,int>>> Q;
+        map<int , map<int , multiset<int>>> m;
+        if(root != NULL)
+        Q.push({root , {0 , 0}});
+        while(!Q.empty()) {
+            auto x = Q.front();
+            Q.pop();
+            TreeNode* node = x.first;
+            int level = x.second.first;
+            int row = x.second.second;
+            
+            m[level][row].insert(node -> val);
+            
+            if(node -> left != NULL) {
+                Q.push({node -> left , {level - 1 , row + 1}});
+            }
+            
+            if(node -> right != NULL) {
+                Q.push({node -> right , {level + 1 , row + 1}});
+            }
+        }
+        for(auto &i: m) {
+          vector<int> temp;
+            for(auto &it: i.second) {
+                for(auto &its: it.second){
+                    temp.push_back(its);
+                }
+            }
+            vertical.push_back(temp);
+        }
+        return vertical;
+    }
+};
+
+ 
+// TOP VIEW OF A BINARY TREE
+
+/*
+APPROACH
+
+We can use the line method for accesing the top elemnts only
+
+we can use a Queue to store the level root and level respectively
+
+and a map that is going to stoe the level and node data 
+
+and before inserting the node data in the map we are going to compae if it's already 
+exsists i the map and if not then we are going to insert in the map
+
+AFTER WE SIMPLY COPY MAP CONTENT IN THE VECTOE AND REUTRN IT
+*/
+
+
+ /*
+struct Node
+{
+    int data;
+    Node* left;
+    Node* right;
+};
+*/
+
+class Solution
+{
+    public:
+    //Function to return a list of nodes visible from the top view 
+    //from left to right in Binary Tree.
+    vector<int> topView(Node *root) {
+        
+        vector<int> TopView;
+        queue<pair<Node* , int>> Q;
+        map<int,int> m;
+        Q.push({root , 0});
+        
+        while(!Q.empty()) {
+            
+            auto x = Q.front();
+            Q.pop();
+            int level = x.second;
+            Node* node = x.first;
+            
+            if(m.find(level) == m.end()) {
+                m[level] = node -> data;
+            }
+            
+            if(node -> left != NULL) {
+                Q.push({node -> left , level - 1});
+            }
+            if(node -> right != NULL) {
+                Q.push({node -> right , level + 1});
+            }
+        }
+        
+        for(auto &i: m) TopView.push_back(i.second);
+        return TopView;
+    }
+
+};
 
