@@ -333,4 +333,158 @@ public:
 
 
 
+//Maximum path sum in a BInary Tree
+
+class Solution {
+public:
+    int depth(TreeNode* root , int& maxi) {
+        if(root == NULL)
+            return 0;
+        
+        int l = max(0 , depth(root -> left , maxi));
+        int r = max(0 , depth(root -> right , maxi));
+        
+        maxi = max(maxi , l + r +  root -> val);
+        
+        return root -> val + max(l , r);
+    }
+    int maxPathSum(TreeNode* root) {
+      int maxi = INT_MIN;
+      depth(root , maxi);
+        
+      return maxi;
+    }
+};
+
+
+//CHECK IF TWO TREES ARE IDNETICAL
+
+class Solution {
+public:
+    bool isSameTree(TreeNode* p, TreeNode* q) {
+        if(p == NULL or q == NULL) {
+            if(p == q)
+                return true;
+            return false;
+        }
+        
+        bool ok = (p->val == q-> val) and isSameTree(p -> left , q -> left);
+        bool oks =(p->val == q-> val) and isSameTree(p -> right , q -> right);
+        
+        return ok and oks;
+    }
+};
+
+//ZIGZAG TRAVERSAL OF TREE
+
+class Solution {
+public:
+    vector<vector<int>> zigzagLevelOrder(TreeNode* root) {
+        vector<vector<int>> Zigzag;
+        queue<TreeNode*> Q;
+        if(root != NULL) {
+            Q.push(root);
+        } 
+        int direction = 0;
+        while(!Q.empty()) {
+            int sz = Q.size();
+            vector<int> level;
+            for(int i = 0; i < sz; i++) {
+                TreeNode* node = Q.front();
+                Q.pop();
+                level.push_back(node -> val);
+                if(node -> left != NULL) {
+                    Q.push(node -> left);
+                }
+                if(node -> right != NULL) {
+                    Q.push(node -> right);
+                }
+            }
+            if(!direction) {
+                Zigzag.push_back(level);
+            }
+            else {
+                reverse(level.begin() , level.end());
+                Zigzag.push_back(level);
+            }
+            direction = 1 - direction;
+        }
+        return Zigzag;
+    }
+};
+
+
+//Boundary taversal of a binary Tree
+
+/* A binary tree Node
+struct Node
+{
+    int data;
+    Node* left, * right;
+}; */
+
+class Solution {
+private:
+    bool leafNode(Node* root) {
+        if(root -> left == NULL and root -> right == NULL) return true;
+        return false;
+    }
+    void addLeftNode(Node* root , vector<int>& arr) {
+        Node* curr = root;
+        while(curr != NULL) {
+            if(!leafNode(curr))
+            arr.push_back(curr -> data);
+            if(curr -> left != NULL) {
+                curr = curr -> left;
+            }
+            else {
+                curr = curr -> right;
+            }
+        }
+    }
+    
+    void addRightNode(Node* root , vector<int>& arr) {
+        Node* curr = root;
+        vector<int> temp;
+        while(curr != NULL) {
+            if(!leafNode(curr)) {
+                temp.push_back(curr -> data);
+            }
+            if(curr -> right != NULL) {
+                curr = curr -> right;
+            }
+            else {
+                curr = curr -> left;
+            }
+        }
+        reverse(temp.begin() , temp.end());
+        for(auto &i: temp) arr.push_back(i);
+    }
+    
+    void addLeafNode(Node* root , vector<int>& arr) {
+        if(leafNode(root)) {
+            arr.push_back(root -> data);
+        }
+        if(root -> left != NULL) 
+          addLeafNode(root -> left , arr);
+        if(root -> right != NULL)
+          addLeafNode(root -> right , arr);
+    }
+public:
+    vector <int> boundary(Node *root) {
+        vector<int> boundaryTraversal;
+        if(root == NULL)
+          return boundaryTraversal;
+        if(!leafNode(root)) {
+            boundaryTraversal.push_back(root -> data);
+        }
+        addLeftNode(root -> left, boundaryTraversal);
+        addLeafNode(root , boundaryTraversal);
+        addRightNode(root -> right, boundaryTraversal);
+        return boundaryTraversal;
+    }
+};
+
+
+
 
