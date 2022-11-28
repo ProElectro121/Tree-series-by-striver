@@ -615,3 +615,168 @@ class Solution
 
 };
 
+
+
+//BOTTOM VIEW OF A BINARY TREE
+
+/*
+ USING THE SAME LINE APPROACH AS DONE EARLIER
+ 
+ SIMPLY STORING THE LAST ELEMNT IN A LINE WITH THE HELP OF A MAP
+*/
+
+class Solution {
+  public:
+    vector <int> bottomView(Node *root) {
+        vector<int> BottomView;
+        queue<pair<Node* , int>> Q;
+        map<int , int> m;
+        if(root != NULL) {
+            Q.push({root , 0});
+        }
+        
+        while(!Q.empty()) {
+            auto x = Q.front();
+            Q.pop();
+            Node* node = x.first;
+            int level = x.second;
+            
+            auto it = m.find(level);
+            if(it == m.end()) {
+                m.insert({level , node -> data});
+            }
+            else {
+                (*it).second = node -> data;
+            }
+            
+            if(node -> left != NULL) {
+                Q.push({node -> left , level - 1});
+            }
+            if(node -> right != NULL) {
+                Q.push({node -> right , level + 1});
+            }
+        }
+        for(auto &i: m) {
+            BottomView.push_back(i.second);
+        }
+        return BottomView;
+    }
+};
+
+
+
+// Right Side view of a binary Tree
+
+/*
+  using the same level and row approach we can store the rown and node data in a map
+  and at last we can simply reutrn the vector
+  
+  Iterative way
+  
+  time complexity - > O(n)
+  
+  space complexity ->  int max case == no of leaf node .. ie in wose cae it full binary tree .. >= n/2 ~ O(n)
+  
+*/
+
+class Solution {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> RightSideView;
+        queue<pair<TreeNode* , pair<int,int>>> Q;
+        map<int,int> m;
+        if(root != NULL)
+        Q.push({root , {0 , 0}});
+        
+        while(!Q.empty()) {
+            auto x = Q.front();
+            TreeNode* node = Q.front().first;
+            Q.pop();
+            
+            int level = x.second.first;
+            int row = x.second.second;
+            
+            int data = node -> val;
+            
+            auto it = m.find(row);
+            
+            if(it == m.end()) {
+                m.insert({row , data});
+            }
+            else {
+                (*it).second = data;
+            }
+            
+            if(node -> left != NULL) {
+                Q.push({node -> left , {level - 1 , row + 1}});
+            }
+            
+            if(node -> right != NULL) {
+                Q.push({node -> right , {level + 1 , row + 1}});
+            }
+        }
+        for(auto &i: m) {
+            RightSideView.push_back(i.second);
+        }
+        return RightSideView;
+    }
+};
+
+
+// recursice way 
+
+/*
+  Time complexity = O(n)
+  space complexity = O(heigh(tree)) 
+*/
+
+class Solution {
+private: 
+    void traverse(TreeNode* root, int level , vector<int>& RightSideView) {
+        if(root == NULL) {
+            return;
+        }
+        
+        if(level == RightSideView.size()) {
+            RightSideView.push_back(root -> val);
+        }
+        
+        traverse(root -> right , level + 1 , RightSideView);
+        traverse(root -> left , level + 1 , RightSideView);
+    }
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> RightSideView;
+        
+        traverse(root , 0 , RightSideView);
+        
+        return RightSideView;
+    }
+};
+
+// CHECK FOR A SYMNTERIC BINARY TREE
+
+class Solution {
+private: 
+    bool check(TreeNode* left , TreeNode* right) {
+        if(left == NULL or right == NULL) {
+            return left == right;
+            
+        }
+            if(left -> val != right -> val) return false;
+            
+            bool first = check(left -> left , right -> right);
+            bool second = check(left -> right , right -> left);
+            
+            return (first and second);
+    }
+public:
+    bool isSymmetric(TreeNode* root) {
+        if(root == NULL) return true;
+        
+        return check(root -> left , root -> right);
+    }
+};
+
+
+
