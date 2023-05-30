@@ -976,3 +976,257 @@ public:
     }
 };
 
+
+
+/*
+Given the root of a binary tree, the value of a target node target, and an integer k, 
+return an array of the values of all nodes that have a distance k from the target node.
+
+Input: root = [3,5,1,6,2,0,8,null,null,7,4], target = 5, k = 2
+Output: [7,4,1]
+Explanation: The nodes that are a distance 2 from the target node (with value 5) have values 7, 4, and 1.
+You can return the answer in any order.
+*/
+
+/*
+   Basic graph traversl problem finding Node that are at a distance of K unit
+   but the problem here is that we can't traverse the parent in a Tree 
+   so for this we have to maintain a pointer to the parent
+   
+   One method is that you can make a graph and perform either a bfs or dfs
+   or you can keep track of parent of all Nodes in a map and that we can perform 
+   dfs in three diection and get all nodes that are k distance apart
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+private:
+    void dfs(TreeNode* root , int& n) {
+        if(root == NULL) return;
+        n = max(n , root -> val);
+        dfs(root -> left , n);
+        dfs(root -> right , n);
+    }
+
+    void dfs2(TreeNode* root , vector<int> graph[]) {
+        if(root == NULL) return;
+
+        if(root -> left != NULL) {
+            int u = root -> val;
+            int v = root -> left -> val;
+            graph[u].push_back(v);
+            graph[v].push_back(u);
+        }
+
+        
+        if(root -> right != NULL) {
+            int u = root -> val;
+            int v = root -> right -> val;
+            graph[u].push_back(v);
+            graph[v].push_back(u);
+        }
+
+        dfs2(root -> left , graph);
+        dfs2(root -> right , graph);
+    }
+
+    void dfs3(int node , int level , vector<int>& vis , vector<int> graph[] , int k , vector<int>& ans) {
+        vis[node] = 1;
+        if(level == k) {
+            ans.push_back(node);
+        }
+        for(auto &child: graph[node]) {
+            if(!vis[child] and level < k ) {
+                dfs3(child , level + 1 , vis , graph , k , ans);
+            }
+        }
+    }
+public:
+    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+        int V = 0;
+        dfs(root , V);
+        vector<int> graph[V + 1];
+
+        dfs2(root , graph);
+        vector<int> ans;
+        vector<int> vis(V + 1 , 0);
+        dfs3(target -> val , 0 , vis , graph ,k , ans);
+
+        return ans;
+    }
+};
+
+
+/*
+  Optimising the space by not making a graph
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+private:
+    void dfs(TreeNode* root , map<TreeNode* , TreeNode*>& parent) {
+        if(root == NULL) return;
+
+        if(root -> left != NULL) {
+            parent[root -> left] = root;
+        }
+        if(root -> right != NULL) {
+            parent[root -> right] = root;
+        }
+
+        dfs(root -> left , parent);
+        dfs(root -> right , parent);
+    }
+
+    void dfs2(TreeNode* node , int level , map<TreeNode* , TreeNode*>& parent, map<TreeNode* ,int> vis , vector<int>& ans , int k) {
+        vis[node] = 1;
+        if(level == k) {
+            ans.push_back(node -> val);
+        }
+        if(parent.find(node) != parent.end() and level < k and vis[parent[node]] == 0) {
+            dfs2(parent[node] , level + 1 , parent , vis , ans , k);
+        }
+        if(node -> left != NULL and level < k and vis[node -> left] == 0) {
+            dfs2(node -> left , level + 1 , parent , vis , ans , k);
+        }
+        if(node -> right != NULL and level < k and vis[node -> right] == 0) {
+            dfs2(node -> right ,level + 1 , parent , vis , ans , k);
+        }
+    }
+public:
+    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+        map<TreeNode* , TreeNode*> parent;
+
+        dfs(root , parent);
+        vector<int> ans;
+        map<TreeNode* , int> vis;
+        dfs2(target , 0 , parent , vis , ans , k);
+        return ans;
+    }
+};
+
+
+// Using bfs
+
+
+
+
+class Solution {
+    void markParents(TreeNode* root, unordered_map<TreeNode*, TreeNode*> &parent_track, TreeNode* target) {
+        queue<TreeNode*> queue;
+        queue.push(root);
+        while(!queue.empty()) { 
+            TreeNode* current = queue.front(); 
+            queue.pop();
+            if(current->left) {
+                parent_track[current->left] = current;
+                queue.push(current->left);
+            }
+            if(current->right) {
+                parent_track[current->right] = current;
+                queue.push(current->right);
+            }
+        }
+    }
+public:
+    vector<int> distanceK(TreeNode* root, TreeNode* target, int k) {
+        unordered_map<TreeNode*, TreeNode*> parent_track; // node -> parent
+        markParents(root, parent_track, target); 
+        
+        unordered_map<TreeNode*, bool> visited; 
+        queue<TreeNode*> queue;
+        queue.push(target);
+        visited[target] = true;
+        int curr_level = 0;
+        while(!queue.empty()) { /*Second BFS to go upto K level from target node and using our hashtable info*/
+            int size = queue.size();
+            if(curr_level++ == k) break;
+            for(int i=0; i<size; i++) {
+                TreeNode* current = queue.front(); queue.pop();
+                if(current->left && !visited[current->left]) {
+                    queue.push(current->left);
+                    visited[current->left] = true;
+                }
+                if(current->right && !visited[current->right]) {
+                    queue.push(current->right);
+                    visited[current->right] = true;
+                }
+                if(parent_track[current] && !visited[parent_track[current]]) {
+                    queue.push(parent_track[current]);
+                    visited[parent_track[current]] = true;
+                }
+            }
+        }
+        vector<int> result;
+        while(!queue.empty()) {
+            TreeNode* current = queue.front(); queue.pop();
+            result.push_back(current->val);
+        }
+        return result;
+    }
+};
+
+
+/*
+Count number of Nodes in a complete Bianry Tree --> O(2logn) approach
+we can take the advantage that if a tree is complete is all nodes are there then 
+the number of Nodes will be 2^(height of Tree) - 1
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+private:
+    int height_left(TreeNode* root) {
+        int cnt = 0;
+        while(root != NULL) {
+            cnt++;
+            root = root -> left;
+        }
+        return cnt;
+    }
+    int height_right(TreeNode* root) {
+        int cnt = 0;
+        while(root != NULL) {
+            cnt++;
+            root = root -> right;
+        }
+        return cnt;
+    }
+public:
+    int countNodes(TreeNode* root) {
+        if(root == NULL) return 0;
+        int l = height_left(root);
+        int r = height_right(root);
+        
+        if(l == r) return ((1 << r) - 1);
+
+        return 1 + countNodes(root -> left) + countNodes(root -> right);
+    }
+};
+
