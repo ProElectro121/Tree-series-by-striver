@@ -779,4 +779,200 @@ public:
 };
 
 
+// Find a path from root Node to the given Node
+
+approach --> perform a simple preorder traversal and if we find the Node at any instant we simpy reutrn 
+and we try to maintain a list as we maintain in recurrsion.
+/**
+ * Definition for binary tree
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+bool solves(TreeNode* root , int node , vector<int>& ans) {
+    if(root == NULL) {
+        return false;
+    }
+    if(root -> val == node) {
+        ans.push_back(node);
+        return true;
+    }
+    ans.push_back(root -> val);
+    if(solves(root -> left , node , ans) == true) return true;
+    if(solves(root -> right , node , ans) == true) return true;
+    
+    ans.pop_back();
+    return false;
+}
+vector<int> Solution::solve(TreeNode* A, int B) {
+    if(A -> val == B) {
+        return vector<int> (1 , A -> val);
+    }
+    vector<int> ans;
+    solves(A , B , ans);
+    
+    return ans;
+}
+
+
+/*
+
+236. Lowest Common Ancestor of a Binary Tree
+Given a binary tree, find the lowest common ancestor (LCA) of two given nodes in the tree.
+
+According to the definition of LCA on Wikipedia: “The lowest common ancestor is defined between two nodes p and q as the lowest node in T that has both p and q as descendants (where we allow a node to be a descendant of itself).”
+
+basically what is lca Path from the given Node to root
+and for two nodes it is the lowermost intersection Node in their respective path from them to Root Node
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+private:
+    bool findPath(TreeNode* root , vector<TreeNode*>& ans, TreeNode* Node) {
+        if(root == NULL) return false;
+        if(Node == root) {
+            ans.push_back(Node);
+            return true;
+        } 
+
+        ans.push_back(root);
+        if(findPath(root -> left , ans , Node) or findPath(root -> right , ans , Node)) {
+            return true;
+        }
+        ans.pop_back();
+        return false;
+    }
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        vector<TreeNode*> a , b;
+        findPath(root , a , p);
+        findPath(root , b , q);
+
+        TreeNode* ans;
+        int n = min(a.size() , b.size());
+        for(int i = 0; i < n; i++) {
+            if(a[i] == b[i]) {
+                ans = a[i];
+            }
+            else break;
+        }
+        return ans;
+    }
+};
+
+// FInding lca recurrsive solution
+/*
+  Case when one of the Node is the lca we are not gona tht parent of the the lca
+  ex [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1
+  ans --> 3 
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Solution {
+private:
+    TreeNode* dfs(TreeNode* root , TreeNode* p , TreeNode* q) {
+        if(root == NULL or root == p or root == q) return root;
+
+        TreeNode* parent1 = dfs(root -> left , p , q);
+        TreeNode* parent2 = dfs(root -> right , p , q);
+
+        if(parent1 != NULL and parent2 != NULL) return root;
+        if(parent1 == NULL and parent2 != NULL) return parent2;
+        if(parent1 != NULL and parent2 == NULL) return parent1;
+
+        return NULL; 
+    }
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        return dfs(root , p , q);
+    }
+};
+
+
+/*
+Given the root of a binary tree, return the maximum width of the given tree.
+
+The maximum width of a tree is the maximum width among all levels.
+
+The width of one level is defined as the length between the end-nodes (the leftmost and rightmost non-null nodes), 
+where the null nodes between the end-nodes that would be present in a complete binary tree extending 
+down to that level are also counted into the length calculation.
+*/
+
+/*
+ Just do indxing like ew do in segmen tree and rest is just implemtntation
+*/
+/*
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    int widthOfBinaryTree(TreeNode* root) {
+        queue<pair<TreeNode* , pair<int,int>>> q;
+        int ans = 0;
+
+        if(root) {
+            q.push({root , {0 , 1}});
+        }
+        map< int, pair<int, int>> mp;
+        while(!q.empty()) {
+            int n = q.size();
+            for(int i = 0; i < n; i++) {
+                auto node = q.front();
+                q.pop();
+
+                TreeNode* Node = node.first;
+                int index = node.second.second;
+                int row = node.second.first;
+
+                if(mp.find(row) == mp.end()) {
+                    mp[row] = {index , index};
+                }
+                else {
+                    mp[row].first = min(mp[row].first , index);
+                    mp[row].second = max(mp[row].second ,index);
+                }
+
+                if(Node -> right) {
+                    q.push({Node -> right , {row + 1 , 2 *1ll*(index - 1) + 1}});
+                }
+                if(Node -> left) {
+                    q.push({Node -> left , {row + 1 , 2 *1ll* (index - 1)}});
+                }
+            }
+        }
+        for(auto &i: mp) {
+            ans = max(1ll*ans , 1ll*i.second.second - 1ll*i.second.first + 1);
+        }
+        return (int)ans;
+    }
+};
 
