@@ -36,3 +36,197 @@ And you can continue this recursively until all subtrees only contain a single e
 And since at each step we could prove that there is only one valid way to continue, the result is that a given pair of in-order and pre-order traversals can only belong to a single tree.
 
 */
+
+
+
+/*
+
+Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and 
+inorder is the inorder traversal of the same tree, construct and return the binary tree.
+
+Input: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+Output: [3,9,20,null,null,15,7]
+
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+private:
+    TreeNode* buildTree(vector<int>& preorder , int startPre , int endPre , vector<int>& inorder , int startind , int endind , map<int,int>& ind) {
+        if(startPre > endPre or startind > endind) return NULL;
+
+        TreeNode* root = new TreeNode(preorder[startPre]);
+        int index = ind[preorder[startPre]] - startind;
+
+        root -> left = buildTree(preorder , startPre + 1 , startPre + index , inorder , startind , ind[preorder[startPre]] - 1,ind); 
+
+        root -> right = buildTree(preorder , startPre + index + 1 , endPre , inorder , ind[preorder[startPre]] + 1 , endind , ind);
+
+        return root;
+    }
+public:
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        map<int , int> ind;
+        for(int i = 0; i < inorder.size(); i++) {
+            ind[inorder[i]] = i;
+        }
+        int n = preorder.size();
+        return buildTree(preorder , 0 , n - 1 , inorder , 0 , n - 1 , ind);
+    }
+};
+
+
+
+/*
+Construct Binary Tree from Inorder and Postorder Traversal
+
+
+*/
+
+
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+private:
+    TreeNode* buildTree(vector<int>& postorder , int postStart , int postEnd , vector<int>& inorder , int indStart , int indEnd , map<int,int>& ind) {
+        if(postStart > postEnd or indStart > indEnd) return NULL;
+
+        TreeNode* root = new TreeNode(postorder[postEnd]);
+        int num = indEnd - ind[root -> val];
+        
+        root -> left = buildTree(postorder , postStart , postEnd - num - 1 , inorder , indStart , ind[root -> val] - 1 , ind);
+
+        root -> right = buildTree(postorder , postEnd - num , postEnd - 1 , inorder , ind[root -> val] + 1 , indEnd , ind);
+
+        return root;
+    }
+public:
+    TreeNode* buildTree(vector<int>& inorder, vector<int>& postorder) {
+        map<int , int> ind;
+        int n = inorder.size();
+        for(int i = 0; i < n; i++) {
+            ind[inorder[i]] = i;
+        }
+
+        return buildTree(postorder , 0 , n - 1 , inorder , 0 , n - 1 , ind);
+    }
+};
+
+
+/*
+Encode and Decode a binary Tree
+first convert Binary tree to string and then to binary tree
+
+using stringstream --> heps in getting substring from a prefix upto a deliminator
+and erasing then prefix upto that deliminator
+
+ex-> string s = "1,2,3,4,5"
+stringstream str(s);
+string temp;
+getline(str , temp , ',');
+
+temp will now store 1
+temp --> 1
+calling the getline function again
+getline(str , temp , ','); 
+temp --> 2
+
+We can use simple level order traversal to generate the string and converting it back to the tree
+*/
+
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode(int x) : val(x), left(NULL), right(NULL) {}
+ * };
+ */
+class Codec {
+private:   
+
+public:
+
+    string serialize(TreeNode* root) {
+        string ans;
+        queue<TreeNode*> q;
+        q.push(root);
+
+        while(!q.empty()) {
+                auto node = q.front();
+                q.pop();
+
+                if(node == NULL) {
+                    ans += "N,";
+                    continue;
+                }
+                else {
+                    ans += to_string(node -> val);
+                    ans += ",";
+                }
+                q.push(node -> left);
+                q.push(node -> right);
+        }
+        return ans;
+    }
+
+    TreeNode* deserialize(string data) {
+        if(data.front() == 'N') return NULL;
+        stringstream s(data);
+
+        string str;
+        getline(s , str , ',');
+
+        TreeNode* root = new TreeNode(stoi(str));
+        queue<TreeNode*> q;
+        q.push(root);
+        while(!q.empty()) {
+                auto node = q.front();
+                q.pop();
+
+                getline(s , str , ',');
+                if(str == "N") {
+                    node -> left = NULL;
+                }
+                else {
+                    TreeNode* leftNode = new TreeNode(stoi(str));
+                    node -> left = leftNode;
+                    q.push(leftNode);
+                }
+
+                getline(s , str , ',');
+                if(str == "N") {
+                    node -> right = NULL;
+                }
+                else {
+                    TreeNode* leftNode = new TreeNode(stoi(str));
+                    node -> right = leftNode;
+                    q.push(leftNode);
+                }
+        }
+        //
+        return root;
+    }
+};
