@@ -230,3 +230,150 @@ public:
         return root;
     }
 };
+
+
+
+/*
+Given the root of a binary tree, flatten the tree into a "linked list":
+
+The "linked list" should use the same TreeNode class where the right child pointer points to the next node in the list and
+the left child pointer is always null.
+The "linked list" should be in the same order as a pre-order traversal of the binary tree.
+ 
+ First one is basic : Stroing the preorder Traversal making a Binary tree with that preorder traversal 
+
+*/
+
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+private:
+    void dfs_preorder(TreeNode* root , vector<int>& ans) {
+        if(root == NULL) return;
+        ans.push_back(root -> val);
+        dfs_preorder(root -> left , ans);
+        dfs_preorder(root -> right , ans);
+    }
+public:
+    void flatten(TreeNode* root) {
+        vector<int> preOrder;
+        dfs_preorder(root , preOrder);
+
+        int ptr = 0;
+        TreeNode* temp = root;
+        int n = preOrder.size();
+        while(ptr < n ) {
+            temp -> val = preOrder[ptr];
+            if(temp -> right == NULL and ptr < n - 1) {
+                TreeNode* temps = new TreeNode();
+                temp -> right = temps;
+            }
+            temp -> left = NULL;
+            temp = temp -> right;
+            ptr++;
+        }
+    }
+};
+
+
+/*
+  Using recurrsion 
+  
+  main loginc is : maintain a previous gloal pointter initially initiallised to NULL after
+  perform some sort of Reverse POst order Traversal ie : (right , left , ROOT)
+  
+  and at last do then following :
+  1. Make the right of currNode to Prev
+  2.set the Left Node to NULL
+  3.set Prev to currNode
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+    TreeNode* prev = NULL;
+private:
+    void flattens(TreeNode* root) {
+        if(root == NULL) return;
+
+        flattens(root -> right);
+        flattens(root -> left);
+
+        root -> right = prev;
+        root -> left = NULL;
+        prev = root;
+    }
+public:
+    void flatten(TreeNode* root) {
+        TreeNode* temp = root;
+        flattens(temp );
+    }
+};
+
+/*
+ Using iterative method
+ Using a stack 
+  Using a stack to initially store the root of the Binary Tree
+  after each iteration push the first right and then left child back in the stack
+  if they are not NULL
+  after this check if whether the stack is empty or Not , if Not then make the right child of currNode to node
+  which if present at top of the stack
+  at last make the left Node of currNode NULL
+*/
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        stack<TreeNode*> st;
+        if(root != NULL) {
+            st.push(root);
+        }
+
+        while(!st.empty()) {
+            TreeNode* node = st.top();
+            st.pop();
+
+            if(node -> right) {
+                st.push(node -> right);
+            }
+            if(node -> left) {
+                st.push(node -> left);
+            }
+
+            if(!st.empty()) {
+                node -> right = st.top();
+            }
+            node -> left = NULL;
+        }
+    }
+};
